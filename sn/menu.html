@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grocery Shop</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            color: #333;
+        }
+
+        h2 {
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .store, .cart {
+            max-width: 450px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            background: linear-gradient(to right, #ffdde1, #ee9ca7);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        button {
+            padding: 8px 14px;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: white;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .add-btn {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+        }
+
+        .add-btn:hover {
+            background: linear-gradient(to right, #00a389, #89b734);
+        }
+
+        .remove-btn {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+        }
+
+        .remove-btn:hover {
+            background: linear-gradient(to right, #d83b5f, #cc3c21);
+        }
+
+        .cart {
+            margin-top: 20px;
+            border: 3px solid #ff6b6b;
+            background: linear-gradient(to right, #ff6b6b, #f7797d);
+            color: white;
+        }
+
+        #cart-items {
+            list-style: none;
+            padding: 0;
+        }
+
+        #cart-items li {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 10px;
+            margin: 6px 0;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        input#share-link {
+            width: 100%;
+            padding: 8px;
+            margin-top: 8px;
+            border: 1px solid #ffffff;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Grocery Shop 🛒</h2>
+    <div class="store">
+        <div class="item">
+            <span>🍏 Apples - $2</span>
+            <button class="add-btn" onclick="addToCart('Apples', 2)">Add to Cart</button>
+        </div>
+        <div class="item">
+            <span>🍌 Bananas - $1</span>
+            <button class="add-btn" onclick="addToCart('Bananas', 1)">Add to Cart</button>
+        </div>
+        <div class="item">
+            <span>🥛 Milk - $3</span>
+            <button class="add-btn" onclick="addToCart('Milk', 3)">Add to Cart</button>
+        </div>
+        <div class="item">
+            <span>🍚 Rice - $5</span>
+            <button class="add-btn" onclick="addToCart('Rice', 5)">Add to Cart</button>
+        </div>
+    </div>
+
+    <h2>Shopping Cart 🛍️</h2>
+    <div class="cart">
+        <ul id="cart-items"></ul>
+        <p><strong>Total: $<span id="total-price">0</span></strong></p>
+        <p><strong>Share this cart:</strong></p>
+        <input type="text" id="share-link" readonly>
+    </div>
+
+    <script>
+        let cart = [];
+        let totalPrice = 0;
+
+        function addToCart(item, price) {
+            cart.push({ item, price });
+            totalPrice += price;
+            updateCart();
+        }
+
+        function removeFromCart(index) {
+            totalPrice -= cart[index].price;
+            cart.splice(index, 1);
+            updateCart();
+        }
+
+        function updateCart() {
+            let cartList = document.getElementById("cart-items");
+            let totalElement = document.getElementById("total-price");
+            let shareLink = document.getElementById("share-link");
+
+            cartList.innerHTML = "";
+            cart.forEach((entry, index) => {
+                let li = document.createElement("li");
+                li.innerHTML = `${entry.item} - $${entry.price} 
+                <button class="remove-btn" onclick="removeFromCart(${index})">Remove</button>`;
+                cartList.appendChild(li);
+            });
+
+            totalElement.textContent = totalPrice;
+
+            let cartItems = cart.map(entry => entry.item).join(",");
+            shareLink.value = window.location.origin + window.location.pathname + "?cart=" + encodeURIComponent(cartItems);
+        }
+
+        function loadCartFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const cartItems = urlParams.get("cart");
+
+            if (cartItems) {
+                const itemsArray = cartItems.split(",");
+                itemsArray.forEach(item => {
+                    switch (item) {
+                        case "Apples": addToCart("Apples", 2); break;
+                        case "Bananas": addToCart("Bananas", 1); break;
+                        case "Milk": addToCart("Milk", 3); break;
+                        case "Rice": addToCart("Rice", 5); break;
+                    }
+                });
+            }
+        }
+
+        window.onload = loadCartFromURL;
+    </script>
+
+</body>
+</html>
